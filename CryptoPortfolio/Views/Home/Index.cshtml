@@ -1,0 +1,87 @@
+﻿@model CryptoPortfolio.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container py-5">
+    <div class="container">
+        <form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Index">
+            <span>Select Portfolio:</span>
+            <input type="file" asp-for="UploadedPortfolio" />
+            <button type="submit" id="btnUploadPortfolio">Upload</button>
+        </form>
+    </div>
+
+    @if (Model != null && string.IsNullOrEmpty(Model.UploadFileErrorMessage) == false)
+    {
+        <div class="container py-3">
+            <div class="alert alert-danger py-3">
+                @Model.UploadFileErrorMessage
+                <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    }
+
+    <div class="container-fluid py-5">
+        <label>Initial portfolio value: @Model.InitialPortfolioValue</label>
+        <label class="px-5">Current portfolio value: @Model.CurrentPortfolioValue</label>
+        <label>Portfolio value change: @Model.PortfolioValueChange</label>
+    </div>
+
+    <div class="container">
+        @if (Model != null && Model.Currencies != null && Model.Currencies.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Ammount</th>
+                        <th>Initial Price</th>
+                        <th>Current Price</th>
+                        <th>Price Change %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var currency in Model.Currencies)
+                    {
+                        <tr>
+                            <td>@currency.Name</td>
+                            <td>@currency.Ammount</td>
+                            <td>@currency.InitialPrice</td>
+                            <td>@currency.CurrentPrice</td>
+                            <td>@currency.PriceChange</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No portfolio loaded!</p>
+        }
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        let refreshInterval = 300000;
+
+        $(function () {
+            setInterval(RefreshMainPage, refreshInterval);
+        })
+
+        function RefreshMainPage() {
+            $.ajax({
+                type: 'GET',
+                url: '/Home/Index',
+                async: true,
+                success: function (response) {
+                    window.location.reload()
+                },
+                error: function (exception) {
+                }
+            })
+        }
+    </script>
+}
